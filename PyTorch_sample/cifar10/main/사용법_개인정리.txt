@@ -1,0 +1,13 @@
+https://github.com/kuangliu/pytorch-cifar
+
+main.py 수정
+====================================
+net = ResNet50() [원하는 모델로 수정]
+====================================
+아래처럼 수정
+if __name__ == '__main__':
+    for epoch in range(start_epoch, start_epoch+200):
+        train(epoch)
+        test(epoch)
+        scheduler.step()
+====================================
