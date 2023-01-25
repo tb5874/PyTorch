@@ -19,19 +19,20 @@ from torch.utils.data import TensorDataset
 import torchvision
 import torchvision.transforms as transforms
 
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from models import *
-from utils.utils import progress_bar
+from utils import *
 
+# Common Path : -->
+data_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/"
+cache_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/"
+# Common Path : <--
 
 def cifar10_parsing():
     try:
         print("Parsing Start")
 
         # Only for cifar10 Hard-Coding : -->
-        download_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/resnet/"
-
-        train_count = 1
+        train_count = 5
         test_count = 1
 
         lable_size = 1
@@ -49,7 +50,7 @@ def cifar10_parsing():
 
         # Dataset : train
         for idx in range(train_count):
-            filepath_cifar10 = download_path + "cifar-10-batches-bin/data_batch_" + str(idx+1) +".bin"
+            filepath_cifar10 = data_path + "cifar-10-batches-bin/data_batch_" + str(idx+1) +".bin"
             binary_cifar10 = open(filepath_cifar10,'rb')
             numpy_cifar10 = np.fromfile(binary_cifar10, dtype=np.uint8)
             for sub_idx in range(image_count * class_count):
@@ -76,7 +77,7 @@ def cifar10_parsing():
 
         # Dataset : test
         for idx in range(test_count):
-            filepath_cifar10 = download_path + "cifar-10-batches-bin/test_batch.bin"
+            filepath_cifar10 = data_path + "cifar-10-batches-bin/test_batch.bin"
             binary_cifar10 = open(filepath_cifar10,'rb')
             numpy_cifar10 = np.fromfile(binary_cifar10, dtype=np.uint8)
             for sub_idx in range(image_count * class_count):
@@ -121,7 +122,7 @@ class CustomTensorDataset(Dataset):
         return self.tensors[0].size(0)
 
 # Train
-def train(net, epoch, device):
+def train(net, epoch, device, loss_fn):
     try:
         print("Start Epoch : %d" % epoch)
         net.train()
@@ -132,7 +133,7 @@ def train(net, epoch, device):
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
             outputs = net(inputs)
-            loss = criterion(outputs, targets)
+            loss = loss_fn(outputs, targets)
             loss.backward()
             optimizer.step()
 
@@ -151,9 +152,8 @@ def train(net, epoch, device):
     except Exception as e : print("Exception :", e)
 
 # Test
-def test(net, epoch, device):
+def test(net, epoch, device, loss_fn):
     try:
-        global best_acc
         net.eval()
         test_loss = 0
         correct = 0
@@ -162,7 +162,7 @@ def test(net, epoch, device):
             for batch_idx, (inputs, targets) in enumerate(testloader):
                 inputs, targets = inputs.to(device), targets.to(device)
                 outputs = net(inputs)
-                loss = criterion(outputs, targets)
+                loss = loss_fn(outputs, targets)
 
                 test_loss += loss.item()
                 _, predicted = outputs.max(1)
@@ -181,23 +181,26 @@ def test(net, epoch, device):
 # Save
 def parameter_save(net, epoch):
     try:
-        print("PyTorch Save Start")
+        print("\nPyTorch Save Start")
 
-        state = { 'net': net.state_dict(), 'epoch': epoch }
+        state = {
+                    'net': net.state_dict(),
+                    'epoch': epoch
+                }
 
         if not os.path.isdir('checkpoint'): os.mkdir('checkpoint')
 
-        torch.save(state, "./checkpoint/PyTorch_epoch_"+ str(epoch) + ".pth")
+        torch.save(state, cache_path + "PyTorch_epoch_"+ str(epoch) + ".pth")
 
         print("PyTorch_epoch_"+ str(epoch) + ".pth : Saved.")
 
-        print("PyTorch Save Done")
+        print("PyTorch Save Done\n")
+
     except Exception as e : print("Exception :", e)
 
 # Main
 if __name__ == '__main__':
     try:
-
         # Model
         net = ResNet50()
 
@@ -232,22 +235,24 @@ if __name__ == '__main__':
         trainloader = torch.utils.data.DataLoader( train_dataset, batch_size=128, shuffle=False )
         testloader = torch.utils.data.DataLoader( test_dataset, batch_size=128, shuffle=False )
 
-        if(True):
-            # Load File
-            root_path = "./checkpoint/"
+        # Load Parameter
+        if(False):
             file_name = "PyTorch_epoch_0.pth"
-            checkpoint = torch.load(root_path + file_name)
+            checkpoint = torch.load(cache_path + file_name)
             net.load_state_dict(checkpoint['net'])
             start_epoch = checkpoint['epoch'] + 1
-            print("Load Path :", root_path + file_name)
+            print("Load Path :", cache_path + file_name)
             print("Load Epoch :", checkpoint['epoch'],"\n")
+        else:
+            start_epoch = 0
 
-        criterion = nn.CrossEntropyLoss()
+        loss_fn = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
 
         for epoch in range(start_epoch, 200):
-            train(net, epoch, device)
-            test(net, epoch, device)
+            train(net, epoch, device, loss_fn)
+            test(net, epoch, device, loss_fn)
             parameter_save(net, epoch)
 
     except Exception as e : print("Exception :", e)
+
