@@ -156,13 +156,13 @@ if __name__ == '__main__':
         tensor_x = torch.Tensor(train_dataset[0]).type(dtype=torch.float)
         tensor_y = torch.Tensor(train_dataset[1]).type(dtype=torch.uint8)
         train_dataset = CustomTensorDataset( tensors=(tensor_x, tensor_y), transform=tool_transform)
-        trainloader = torch.utils.data.DataLoader( train_dataset, batch_size=128, shuffle=False )
+        trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=False)
 
         # Test Dataset & Dataloader
         tensor_x = torch.Tensor(test_dataset[0]).type(dtype=torch.float)
         tensor_y = torch.Tensor(test_dataset[1]).type(dtype=torch.uint8)
         test_dataset = CustomTensorDataset( tensors=(tensor_x, tensor_y), transform=tool_transform)
-        testloader = torch.utils.data.DataLoader( test_dataset, batch_size=128, shuffle=False )
+        testloader = torch.utils.data.DataLoader(test_dataset, batch_size=128, shuffle=False)
 
         # Load Parameter
         start_epoch = 0
