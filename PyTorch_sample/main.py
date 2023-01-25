@@ -2,7 +2,6 @@
 import os
 import sys
 import copy
-import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,16 +10,13 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import torch.backends.cudnn as cudnn
 
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
 
-import torchvision
 import torchvision.transforms as transforms
 
-from models import *
-from utils import *
+from cifar10.models import *
 
 # Common Path : -->
 data_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/"
@@ -55,7 +51,7 @@ def cifar10_parsing():
             numpy_cifar10 = np.fromfile(binary_cifar10, dtype=np.uint8)
             for sub_idx in range(image_count * class_count):
 
-                # [ index (0000) ~ index (lable_size + image_size) ]
+                # [ index (0000) ~ index (lable_size(3072byte) + image_size(1byte)) ]
                 # [ index (0000) ~ index (3072) ] = [ 3073 byte ]
                 # [ index (3073) ~ index (6145) ] = [ 3073 byte ]
                 # ...
@@ -122,9 +118,10 @@ class CustomTensorDataset(Dataset):
         return self.tensors[0].size(0)
 
 # Train
-def train(net, epoch, device, loss_fn):
+def train(net, epoch, device, loss_fn, trainloader):
     try:
-        print("Start Epoch : %d" % epoch)
+        print("\n#########################################################")
+        print("Train Batch Size : {:d}".format(trainloader.batch_size))
         net.train()
         train_loss = 0
         correct = 0
@@ -142,18 +139,18 @@ def train(net, epoch, device, loss_fn):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            progress_bar(   batch_idx,
-                            len(trainloader),
-                            'Loss: %.3f | Acc: %.3f%% (%d/%d)' % (train_loss/(batch_idx+1),
-                            100.*correct/total,
-                            correct,
-                            total)
-                        )
+            if (batch_idx%10 == 9) or (batch_idx == len(trainloader)-1):
+                print( "\nBatch : {:d}/{:d}".format(batch_idx+1, len(trainloader)) )
+                print( "Train Loss : {:.3f} ".format((train_loss/(batch_idx+1))) )
+                print( "Train ACC : {:.2f}% [{:d}/{:d}] ".format((100.0 * correct / total), correct, total) )
+
     except Exception as e : print("Exception :", e)
 
 # Test
-def test(net, epoch, device, loss_fn):
+def test(net, epoch, device, loss_fn, testloader):
     try:
+        print("\n#########################################################")
+        print("Test Batch Size : {:d}".format(testloader.batch_size))
         net.eval()
         test_loss = 0
         correct = 0
@@ -169,13 +166,11 @@ def test(net, epoch, device, loss_fn):
                 total += targets.size(0)
                 correct += predicted.eq(targets).sum().item()
 
-                progress_bar(   batch_idx,
-                                len(testloader),
-                                'Loss: %.3f | Acc: %.3f%% (%d/%d)' % (test_loss/(batch_idx+1),
-                                100.*correct/total,
-                                correct,
-                                total)
-                            )
+                if (batch_idx%10 == 9) or (batch_idx == len(testloader)-1):
+                    print( "\nBatch : {:d}/{:d}".format(batch_idx+1, len(testloader)) )
+                    print( "Test Loss : {:.3f} ".format((test_loss/(batch_idx+1))) )
+                    print( "Test ACC : {:.2f}% [{:d}/{:d}] ".format((100.0 * correct / total), correct, total) )
+
     except Exception as e : print("Exception :", e)
 
 # Save
@@ -198,6 +193,27 @@ def parameter_save(net, epoch):
 
     except Exception as e : print("Exception :", e)
 
+# Load
+def parameter_load(net, start_epoch):
+    try:
+        if (True):
+            # Load File
+            file_name = "PyTorch_epoch_18.pth"
+            checkpoint = torch.load(cache_path + file_name)            
+
+            # Get Parameter : weight
+            net.load_state_dict(checkpoint['net'])
+
+            # Get Parameter : state
+            start_epoch = checkpoint['epoch'] + 1
+
+            print("Load Path :", cache_path + file_name)
+            print("Load Epoch :", checkpoint['epoch'],"\n")
+
+        return net, start_epoch
+
+    except Exception as e : print("Exception :", e)
+
 # Main
 if __name__ == '__main__':
     try:
@@ -205,8 +221,6 @@ if __name__ == '__main__':
         net = ResNet50()
 
         # Device Check
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
         if torch.cuda.is_available():
             device = 'cuda'
             net = net.to(device)
@@ -215,43 +229,38 @@ if __name__ == '__main__':
             device = 'cpu'
             net = net.to(device)
 
+        # Parsing
         train_dataset, test_dataset, classes = cifar10_parsing()
 
         # To Tensor : Resize
         tool_transform = transforms.Resize(size = (224, 224))
 
-        # Tensor Dataset : -->
-        # Train
+        # Train Dataset & Dataloader
         tensor_x = torch.Tensor(train_dataset[0]).type(dtype=torch.float)
         tensor_y = torch.Tensor(train_dataset[1]).type(dtype=torch.uint8)
         train_dataset = CustomTensorDataset( tensors=(tensor_x, tensor_y), transform=tool_transform)
-        # Test
+        trainloader = torch.utils.data.DataLoader( train_dataset, batch_size=128, shuffle=False )
+
+        # Test Dataset & Dataloader
         tensor_x = torch.Tensor(test_dataset[0]).type(dtype=torch.float)
         tensor_y = torch.Tensor(test_dataset[1]).type(dtype=torch.uint8)
         test_dataset = CustomTensorDataset( tensors=(tensor_x, tensor_y), transform=tool_transform)
-        # Tensor Dataset : <--
-
-        # Tensor Dataloader
-        trainloader = torch.utils.data.DataLoader( train_dataset, batch_size=128, shuffle=False )
         testloader = torch.utils.data.DataLoader( test_dataset, batch_size=128, shuffle=False )
 
         # Load Parameter
-        if(False):
-            file_name = "PyTorch_epoch_0.pth"
-            checkpoint = torch.load(cache_path + file_name)
-            net.load_state_dict(checkpoint['net'])
-            start_epoch = checkpoint['epoch'] + 1
-            print("Load Path :", cache_path + file_name)
-            print("Load Epoch :", checkpoint['epoch'],"\n")
-        else:
-            start_epoch = 0
+        start_epoch = 0
+        net, start_epoch = parameter_load(net, start_epoch)
 
+        # Loss
         loss_fn = nn.CrossEntropyLoss()
+
+        # Optimizer
         optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
 
         for epoch in range(start_epoch, 200):
-            train(net, epoch, device, loss_fn)
-            test(net, epoch, device, loss_fn)
+            print("Start Epoch : {:d}".format(epoch))
+            train(net, epoch, device, loss_fn, trainloader)
+            test(net, epoch, device, loss_fn, testloader)
             parameter_save(net, epoch)
 
     except Exception as e : print("Exception :", e)
