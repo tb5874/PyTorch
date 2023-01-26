@@ -117,7 +117,7 @@ def cifar10_parsing():
         train_image = np.array(train_image/255.0, dtype=np.float32)
         test_image = np.array(test_image/255.0, dtype=np.float32)
 
-        classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+        classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
         print("Parsing Done\n")
         return [train_image, train_lable], [test_image, test_lable], classes
