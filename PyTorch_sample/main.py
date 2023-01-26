@@ -16,7 +16,7 @@ cache_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/
 dataset_name = "cifar10"
 from cifar10.models import *
 from cifar10.parser import *
-# Setting : <--`
+# Setting : <--
 
 # Custom Tensor Dataset
 class CustomTensorDataset(Dataset):
