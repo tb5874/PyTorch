@@ -3,10 +3,49 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-data_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/cifar10/"
+import urllib.request
+import tarfile
+
+# Setting : -->
+data_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/"
+
+download_path = data_path + "cifar10/"
+download_filename = "cifar-10-binary.tar.gz"
+download_url = "https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz"
+# Setting : <--
+
+def cifar10_download():
+    try:
+        print("Download Start")
+
+        if os.path.exists(download_path + download_filename):
+            print("Already File Exist :",download_path + download_filename)
+        else:
+            urllib.request.urlretrieve(download_url, download_path + download_filename) 
+
+        print("Download Done\n")
+
+    except Exception as e : print("Exception :", e)
+
+def cifar10_unzip():
+    try:
+        print("Unzip Start")
+
+        with tarfile.open(download_path+download_filename, 'r:gz') as tr:
+            tr.extractall(path=download_path)
+
+        print("Unzip Done\n")
+
+    except Exception as e : print("Exception :", e)
 
 def cifar10_parsing():
     try:
+        # Download Cifar10 Dataset
+        cifar10_download()
+
+        # Unzip Cifar10 Dataset
+        cifar10_unzip()
+
         print("Parsing Start")
 
         # Only for cifar10 Hard-Coding : -->
@@ -28,7 +67,7 @@ def cifar10_parsing():
 
         # Dataset : train
         for idx in range(train_count):
-            filepath_cifar10 = data_path + "cifar-10-batches-bin/data_batch_" + str(idx+1) +".bin"
+            filepath_cifar10 = download_path + "cifar-10-batches-bin/data_batch_" + str(idx+1) +".bin"
             binary_cifar10 = open(filepath_cifar10,'rb')
             numpy_cifar10 = np.fromfile(binary_cifar10, dtype=np.uint8)
             for sub_idx in range(image_count * class_count):
@@ -55,7 +94,7 @@ def cifar10_parsing():
 
         # Dataset : test
         for idx in range(test_count):
-            filepath_cifar10 = data_path + "cifar-10-batches-bin/test_batch.bin"
+            filepath_cifar10 = download_path + "cifar-10-batches-bin/test_batch.bin"
             binary_cifar10 = open(filepath_cifar10,'rb')
             numpy_cifar10 = np.fromfile(binary_cifar10, dtype=np.uint8)
             for sub_idx in range(image_count * class_count):
