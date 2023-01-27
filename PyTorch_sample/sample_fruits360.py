@@ -41,7 +41,7 @@ if __name__ == '__main__':
         # print(net)
 
         # Parsing : NumPy
-        train_dataset, test_dataset, classes = fruits360_parsing()
+        train_dataset, test_dataset, classes = fruits360_parsing_ver2()
 
         # To Tensor : Resize
         tool_transform = transforms.Resize(size = image_size)
