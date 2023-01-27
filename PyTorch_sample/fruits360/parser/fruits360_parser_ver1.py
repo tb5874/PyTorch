@@ -7,9 +7,9 @@ from PIL import Image
 
 data_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/"
 
-filepath_fruits360 = data_path + "fruits360/new/"
+filepath_fruits360 = data_path + "fruits360/split_data/"
 
-data_class = ["a", "b", "c", "d"]
+data_class = ["apple", "banana", "orange", "strawberry"]
 
 def fruits360_parsing_ver1():
     try:
@@ -21,8 +21,8 @@ def fruits360_parsing_ver1():
         test_lable = []
         classes = []
 
-        for class_idx in range(4):
-            for idx in range(1000):
+        for class_idx in range(len(data_class)):
+            for idx in range(2500):
                 img = Image.open(filepath_fruits360 + "train/" + data_class[class_idx] + "/" + data_class[class_idx] + " (" + str(idx+1) + ").jpg").convert('RGB')
                 numpy_img  = np.array(img)
                 numpy_tans = np.transpose(numpy_img, (2, 0, 1))

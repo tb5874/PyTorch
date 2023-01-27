@@ -20,7 +20,7 @@ from fruits360.parser import *
 if __name__ == '__main__':
     try:
         # Model
-        if (True):
+        if (False):
             net = FruitsNet()
             image_size = (100, 100)
         else:
@@ -41,7 +41,7 @@ if __name__ == '__main__':
         # print(net)
 
         # Parsing : NumPy
-        train_dataset, test_dataset, classes = fruits360_parsing_ver2()
+        train_dataset, test_dataset, inference_dataset, classes = fruits360_parsing_ver2()
 
         # To Tensor : Resize
         tool_transform = transforms.Resize(size = image_size)
@@ -58,21 +58,27 @@ if __name__ == '__main__':
         test_dataset = CustomTensorDataset( tensors=(tensor_x, tensor_y), transform=tool_transform )
         testloader = torch.utils.data.DataLoader(test_dataset, batch_size=128, shuffle=False)
 
+        # Inference Dataset & Dataloader
+        tensor_x = torch.Tensor(inference_dataset).type(dtype=torch.float)
+        inference_dataset = InferenceTensorDataset( tensors=tensor_x, transform=tool_transform )
+        inferenceloader = torch.utils.data.DataLoader(inference_dataset, batch_size=1, shuffle=False)
+
         # Load Parameter
-        start_epoch = 0
-        net, start_epoch = parameter_load(net, start_epoch, dataset_name, False)
+        net, start_epoch = parameter_load(net, 0, dataset_name, False)
 
         # Loss
         loss_fn = nn.CrossEntropyLoss()
 
         # Optimizer
-        optimizer = optim.Adam(net.parameters(), lr=1e-3)
+        optimizer = optim.Adam(net.parameters(), lr=1e-4)
 
         for epoch in range(start_epoch, 200):
             print("Start Epoch : {:d}".format(epoch))
             train(net, epoch, device, loss_fn, trainloader, optimizer)
             test(net, epoch, device, loss_fn, testloader)
+            inference(net, device, inferenceloader, classes)
             parameter_save(net, epoch, dataset_name)
+
 
     except Exception as e : print("Exception :", e)
 

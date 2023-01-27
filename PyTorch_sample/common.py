@@ -20,6 +20,19 @@ class CustomTensorDataset(Dataset):
     def __len__(self):
         return self.tensors[0].size(0)
 
+class InferenceTensorDataset(Dataset):
+    def __init__(self, tensors, transform=None):
+        self.tensors = tensors
+        self.transform = transform
+
+    def __getitem__(self, index):
+        x = self.tensors[index]
+        if self.transform: x = self.transform(x)
+        return x
+
+    def __len__(self):
+        return self.tensors.size(0)
+
 # Train
 def train(net, epoch, device, loss_fn, trainloader, optimizer):
     try:
@@ -73,6 +86,22 @@ def test(net, epoch, device, loss_fn, testloader):
                     print( "\nBatch : {:d}/{:d}".format(batch_idx+1, len(testloader)) )
                     print( "Test Loss : {:.3f} ".format((test_loss/(batch_idx+1))) )
                     print( "Test ACC : {:.2f}% [{:d}/{:d}] ".format((100.0 * correct / total), correct, total) )
+
+    except Exception as e : print("Exception :", e)
+
+# Inference
+def inference(net, device, inferenceloader, classes):
+    try:
+        print("\n#########################################################")
+        print("Inference Start")
+        net.eval()
+        with torch.no_grad():
+            for batch_idx, inputs in enumerate(inferenceloader):
+                inputs = inputs.to(device)
+                outputs = net(inputs)
+                #print(outputs)
+                print("index : ", batch_idx , " : ", classes[torch.argmax(outputs)])
+        print("Inference Done")
 
     except Exception as e : print("Exception :", e)
 
