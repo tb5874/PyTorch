@@ -70,7 +70,7 @@ if __name__ == '__main__':
         loss_fn = nn.CrossEntropyLoss()
 
         # Optimizer
-        optimizer = optim.Adam(net.parameters(), lr=1e-4)
+        optimizer = optim.Adam(net.parameters(), lr=1e-5)
 
         for epoch in range(start_epoch, 200):
             print("Start Epoch : {:d}".format(epoch))
