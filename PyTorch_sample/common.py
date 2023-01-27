@@ -1,22 +1,9 @@
 import os
-import sys
-import copy
-
 import torch
-import torch.nn as nn
-import torch.optim as optim
 
 from torch.utils.data import Dataset
 
-import torchvision.transforms as transforms
-
 cache_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/"
-
-# Setting : -->
-dataset_name = "cifar10"
-from cifar10.models import *
-from cifar10.parser import *
-# Setting : <--
 
 # Custom Tensor Dataset
 class CustomTensorDataset(Dataset):
@@ -34,7 +21,7 @@ class CustomTensorDataset(Dataset):
         return self.tensors[0].size(0)
 
 # Train
-def train(net, epoch, device, loss_fn, trainloader):
+def train(net, epoch, device, loss_fn, trainloader, optimizer):
     try:
         print("\n#########################################################")
         print("Train Batch Size : {:d}".format(trainloader.batch_size))
@@ -90,7 +77,7 @@ def test(net, epoch, device, loss_fn, testloader):
     except Exception as e : print("Exception :", e)
 
 # Save
-def parameter_save(net, epoch):
+def parameter_save(net, epoch, dataset_name):
     try:
         print("\nPyTorch Save Start")
 
@@ -99,86 +86,33 @@ def parameter_save(net, epoch):
                     'epoch': epoch
                 }
 
-        if not os.path.isdir('checkpoint'): os.mkdir('checkpoint')
+        save_info = cache_path + "PyTorch_" + dataset_name + "_epoch_"+ str(epoch) + ".pth"
+        torch.save(state, save_info)
 
-        save_name = cache_path + "PyTorch_" + dataset_name + "_epoch_"+ str(epoch) + ".pth"
-        torch.save(state, save_name)
-
-        print(save_name, " : Saved.")
+        print(save_info, " : Saved.")
 
         print("PyTorch Save Done\n")
 
     except Exception as e : print("Exception :", e)
 
 # Load
-def parameter_load(net, start_epoch):
+def parameter_load(net, start_epoch, dataset_name, load_flag):
     try:
-        if (False):
+        if (load_flag):
             # Load File
-            file_name = "PyTorch_cifar10_epoch_0.pth"
-            checkpoint = torch.load(cache_path + file_name)            
+
+            load_info = cache_path + "PyTorch_" + dataset_name + "_epoch_"+ str(start_epoch) + ".pth"
+            checkpoint = torch.load(load_info)            
 
             # Get Parameter : weight
             net.load_state_dict(checkpoint['net'])
 
-            # Get Parameter : state
-            start_epoch = checkpoint['epoch'] + 1
-
-            print("Load Path :", cache_path + file_name)
+            print("Load Path :", load_info)
             print("Load Epoch :", checkpoint['epoch'],"\n")
 
+            start_epoch = checkpoint['epoch'] + 1
+
         return net, start_epoch
-
-    except Exception as e : print("Exception :", e)
-
-# Main
-if __name__ == '__main__':
-    try:
-        # Model
-        net = ResNet50()
-
-        # Device Check
-        if torch.cuda.is_available():
-            device = 'cuda'
-            net = net.to(device)
-            net = torch.nn.DataParallel(net)
-        else:
-            device = 'cpu'
-            net = net.to(device)
-
-        # Parsing : NumPy
-        train_dataset, test_dataset, classes = cifar10_parsing()
-
-        # To Tensor : Resize
-        tool_transform = transforms.Resize(size = (224, 224))
-
-        # Train Dataset & Dataloader
-        tensor_x = torch.Tensor(train_dataset[0]).type(dtype=torch.float)
-        tensor_y = torch.Tensor(train_dataset[1]).type(dtype=torch.uint8)
-        train_dataset = CustomTensorDataset( tensors=(tensor_x, tensor_y), transform=tool_transform)
-        trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=False)
-
-        # Test Dataset & Dataloader
-        tensor_x = torch.Tensor(test_dataset[0]).type(dtype=torch.float)
-        tensor_y = torch.Tensor(test_dataset[1]).type(dtype=torch.uint8)
-        test_dataset = CustomTensorDataset( tensors=(tensor_x, tensor_y), transform=tool_transform)
-        testloader = torch.utils.data.DataLoader(test_dataset, batch_size=128, shuffle=False)
-
-        # Load Parameter
-        start_epoch = 0
-        net, start_epoch = parameter_load(net, start_epoch)
-
-        # Loss
-        loss_fn = nn.CrossEntropyLoss()
-
-        # Optimizer
-        optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
-
-        for epoch in range(start_epoch, 200):
-            print("Start Epoch : {:d}".format(epoch))
-            train(net, epoch, device, loss_fn, trainloader)
-            test(net, epoch, device, loss_fn, testloader)
-            parameter_save(net, epoch)
 
     except Exception as e : print("Exception :", e)
 

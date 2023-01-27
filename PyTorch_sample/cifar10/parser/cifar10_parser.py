@@ -117,6 +117,22 @@ def cifar10_parsing():
         train_image = np.array(train_image/255.0, dtype=np.float32)
         test_image = np.array(test_image/255.0, dtype=np.float32)
 
+        # Binary Already Shuffled : -->
+
+        # Shuffle Train
+        # shuffle_idx = np.arange(50000)
+        # np.random.shuffle(shuffle_idx)
+        # train_image = train_image[shuffle_idx]
+        # train_lable = train_lable[shuffle_idx]
+
+        # Shuffle Test
+        # shuffle_idx = np.arange(10000)
+        # np.random.shuffle(shuffle_idx)
+        # test_image = test_image[shuffle_idx]
+        # test_lable = test_lable[shuffle_idx]
+
+        # Binary Already Shuffled : <--
+
         classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
         print("Parsing Done\n")

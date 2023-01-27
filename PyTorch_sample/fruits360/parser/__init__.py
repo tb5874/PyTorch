@@ -1,1 +1,1 @@
-from .cifar10_parser import *
+from .fruits360_parser import *
