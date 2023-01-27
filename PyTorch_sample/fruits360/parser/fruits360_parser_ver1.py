@@ -11,7 +11,7 @@ filepath_fruits360 = data_path + "fruits360/new/"
 
 data_class = ["a", "b", "c", "d"]
 
-def fruits360_parsing():
+def fruits360_parsing_ver1():
     try:
         print("Parsing Start")
 
