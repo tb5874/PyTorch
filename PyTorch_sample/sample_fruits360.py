@@ -19,12 +19,15 @@ from fruits360.parser import *
 # Main
 if __name__ == '__main__':
     try:
+        # Parsing : NumPy
+        train_dataset, test_dataset, inference_dataset, classes = fruits360_parsing_ver2()
+
         # Model
         if (False):
             net = FruitsNet()
             image_size = (100, 100)
         else:
-            net = ResNet50()
+            net = ResNet50(len(classes))
             image_size = (224, 224)
 
         # Device Check
@@ -39,9 +42,6 @@ if __name__ == '__main__':
         # Model Show
         # summary(net, (3, @, @))
         # print(net)
-
-        # Parsing : NumPy
-        train_dataset, test_dataset, inference_dataset, classes = fruits360_parsing_ver2()
 
         # To Tensor : Resize
         tool_transform = transforms.Resize(size = image_size)

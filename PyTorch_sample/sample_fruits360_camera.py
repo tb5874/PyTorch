@@ -21,8 +21,13 @@ from webcam import *
 if __name__ == '__main__':
 
     try:
+
+        # Parsing : NumPy
+        inference_dataset = webcam_parser()
+        classes = ['apple', 'banana', 'orange', 'strawberry']
+
         # Model
-        net = ResNet50()
+        net = ResNet50(len(classes))
         image_size = (224, 224)
 
         # Device Check
@@ -33,10 +38,6 @@ if __name__ == '__main__':
         else:
             device = 'cpu'
             net = net.to(device)
-
-        # Parsing : NumPy
-        inference_dataset = webcam_parser() # 카메라 함수 대체
-        classes = ['apple', 'banana', 'orange', 'strawberry']
 
         # To Tensor : Resize
         tool_transform = transforms.Resize(size = image_size)
