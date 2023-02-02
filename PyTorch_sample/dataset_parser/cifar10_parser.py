@@ -7,10 +7,10 @@ import urllib.request
 import tarfile
 
 # Setting : -->
-data_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/"
+download_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/cifar10/"
 
-download_path = data_path + "cifar10/"
 download_filename = "cifar-10-binary.tar.gz"
+
 download_url = "https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz"
 # Setting : <--
 
@@ -118,7 +118,6 @@ def cifar10_parsing():
         test_image = np.array(test_image/255.0, dtype=np.float32)
 
         # Binary Already Shuffled : -->
-
         # Shuffle Train
         # shuffle_idx = np.arange(50000)
         # np.random.shuffle(shuffle_idx)
@@ -130,7 +129,6 @@ def cifar10_parsing():
         # np.random.shuffle(shuffle_idx)
         # test_image = test_image[shuffle_idx]
         # test_lable = test_lable[shuffle_idx]
-
         # Binary Already Shuffled : <--
 
         classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']

@@ -1,13 +1,18 @@
+import os
+
 import cv2
 import numpy as np
-import os
 import matplotlib as plt
-
-cache_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/"
 
 def webcam_parser():
     try:
         print("Webcam Start")
+
+        # Fake Dataset
+        if(False):
+            X_infer = np.zeros((100,3,224,224), dtype=np.float32)
+            return X_infer
+
         inference_image = []
 
         # '0' is camera index
@@ -59,7 +64,7 @@ def webcam_parser():
         # Image Normalization (0.0~1.0)
         X_infer = np.divide(image_np, 255.0, dtype=np.float32)
 
-        return X_infer, classes
+        return X_infer
 
     except Exception as e : print("Exception :", e)
 

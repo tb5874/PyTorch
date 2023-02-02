@@ -5,33 +5,43 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-cache_path = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/"
+# Setting : -->
+train_test_path         = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/fruits360/train_test/"
+inference_path          = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/fruits360/inference/"
 
-def fruits360_parsing_ver2():
+#numpy_cache_path        = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/numpy/size_100by100/"
+numpy_cache_path        = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/numpy/size_224by224/"
+
+each_class_count        = 2500
+total_inference_count   = 15
+
+raw_resize              = (224, 224)
+# Setting : <--
+
+def fruits360_parsing(train_flag):
     try:
         print("Parsing Start")
         image = []
         label = []
         inference_image = []
 
-
         # Define a list of classes and their corresponding labels
+        # train_test/<folder name>
         classes = ['apple', 'banana', 'orange', 'strawberry']
-        class_labels = {class_name: i for i, class_name in enumerate(classes)}
-
 
         # Train Test Dataset : -->
-        if (False):
+        if (train_flag):
             # File parse
-            filepath_fruit360 = "C:\\Users\\eng\\Desktop\\PyTorch_data\\fruits360\\train_test"
+            filepath_fruit360 = train_test_path
             for class_name in classes:
-                for idx in range(2500):
-                    img = Image.open(filepath_fruit360 + "/" + class_name + "/" + class_name + " (" + str(idx+1) + ").jpg").convert("RGB")
+                print("Train :", class_name)
+                for idx in range(each_class_count):
+                    img = Image.open( filepath_fruit360 + class_name + "/" + class_name + " (" + str(idx+1) + ").jpg" ).convert("RGB")
                     numpy_img = np.array(img)
-                    resize_numpy_img = cv2.resize(numpy_img, (224, 224), interpolation=cv2.INTER_LINEAR)
+                    resize_numpy_img = cv2.resize(numpy_img, raw_resize, interpolation=cv2.INTER_LINEAR)
                     transpose_numpy_img = np.transpose(resize_numpy_img, (2, 0, 1))
                     image.append(transpose_numpy_img)
-                    label.append(class_labels[class_name])
+                    label.append( classes.index(class_name) )
                     img.close()
 
             # Image & label to ndarray
@@ -57,31 +67,37 @@ def fruits360_parsing_ver2():
             y_train, y_test = label_np[:split], label_np[split:]
 
             # NumPy Save
-            np.save(cache_path + "size_224by224/X_train.npy", X_train)
-            np.save(cache_path + "size_224by224/y_train.npy", y_train)
-            np.save(cache_path + "size_224by224/X_test.npy", X_test)
-            np.save(cache_path + "size_224by224/y_test.npy", y_test)
+            np.save(numpy_cache_path + "X_train.npy", X_train)
+            np.save(numpy_cache_path + "y_train.npy", y_train)
+            np.save(numpy_cache_path + "X_test.npy", X_test)
+            np.save(numpy_cache_path + "y_test.npy", y_test)
         else:
             # NumPy Load
-            X_train = np.load(cache_path + "size_224by224/X_train.npy")
-            y_train = np.load(cache_path + "size_224by224/y_train.npy")
-            X_test = np.load(cache_path + "size_224by224/X_test.npy")
-            y_test = np.load(cache_path + "size_224by224/y_test.npy")
+            if os.path.exists(numpy_cache_path + "X_train.npy") and\
+                os.path.exists(numpy_cache_path + "y_train.npy") and\
+                os.path.exists(numpy_cache_path + "X_test.npy") and\
+                os.path.exists(numpy_cache_path + "y_test.npy"):
+                X_train = np.load(numpy_cache_path + "X_train.npy")
+                y_train = np.load(numpy_cache_path + "y_train.npy")
+                X_test = np.load(numpy_cache_path + "X_test.npy")
+                y_test = np.load(numpy_cache_path + "y_test.npy")
+            else:
+                raise Exception("Not exist file\n")
         # Train Test Dataset : <--
 
 
         # Inference Dataset : -->
         # File parse
-        filepath_fruit360 = "C:\\Users\\eng\\Desktop\\PyTorch_data\\fruits360\\inference"
-        for idx in range(15):
-            img = Image.open(filepath_fruit360 + "/" + "infer" + " (" + str(idx+1) + ").jpg").convert("RGB")
+        filepath_fruit360 = inference_path
+        for idx in range(total_inference_count):
+            img = Image.open( filepath_fruit360 + "infer" + " (" + str(idx+1) + ").jpg" ).convert("RGB")
             numpy_img = np.array(img)
-            resize_numpy_img = cv2.resize(numpy_img, (224, 224), interpolation=cv2.INTER_LINEAR)
+            resize_numpy_img = cv2.resize(numpy_img, raw_resize, interpolation=cv2.INTER_LINEAR)
             transpose_numpy_img = np.transpose(resize_numpy_img, (2, 0, 1))
             inference_image.append(transpose_numpy_img)
             img.close()
 
-        # Image & label to ndarray
+        # Image to ndarray
         image_np = np.array(inference_image, dtype=np.uint8)
         # show
         if (False):

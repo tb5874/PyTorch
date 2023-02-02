@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class fruits360_model(nn.Module):
-    def __init__(self):
+    def __init__(self, output_size):
         super(fruits360_model, self).__init__()
 
         # image size : 100 -> 50 -> 25 -> 13 -> 7 -> flatten -> Linear 1024 -> Linear 256 -> class N
@@ -28,7 +28,7 @@ class fruits360_model(nn.Module):
         self.flatten1 = nn.Flatten() # 7 * 7 * 128 = 6272
         self.linear1 = nn.Linear(6272, 1024)
         self.linear2 = nn.Linear(1024, 256)
-        self.linear3 = nn.Linear(256, 4)
+        self.linear3 = nn.Linear(256, output_size)
 
         # Need to Modify : <--
 
@@ -57,5 +57,5 @@ class fruits360_model(nn.Module):
 
         return out
 
-def FruitsNet():
-    return fruits360_model()
+def FruitsNet(output_size):
+    return fruits360_model(output_size)

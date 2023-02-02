@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -82,8 +83,9 @@ class Bottleneck(nn.Module):
         return out
 
 
+# input 224 x 224
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10):
+    def __init__(self, block, num_blocks, output_size):
         super(ResNet, self).__init__()
         self.in_planes = 64
 
@@ -98,7 +100,7 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
 
         self.avg_pool = nn.AdaptiveAvgPool2d((1,1))
-        self.linear = nn.Linear(512*block.expansion, num_classes)
+        self.linear = nn.Linear(512*block.expansion, output_size)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
@@ -127,22 +129,22 @@ class ResNet(nn.Module):
         return out
 
 
-def ResNet18(num_class):
-    return ResNet(BasicBlock, [2, 2, 2, 2], num_class)
+def ResNet18(output_size):
+    return ResNet(BasicBlock, [2, 2, 2, 2], output_size)
 
 
-def ResNet34(num_class):
-    return ResNet(BasicBlock, [3, 4, 6, 3], num_class)
+def ResNet34(output_size):
+    return ResNet(BasicBlock, [3, 4, 6, 3], output_size)
 
 
-def ResNet50(num_class):
-    return ResNet(Bottleneck, [3, 4, 6, 3], num_class)
+def ResNet50(output_size):
+    return ResNet(Bottleneck, [3, 4, 6, 3], output_size)
 
 
-def ResNet101(num_class):
-    return ResNet(Bottleneck, [3, 4, 23, 3], num_class)
+def ResNet101(output_size):
+    return ResNet(Bottleneck, [3, 4, 23, 3], output_size)
 
 
-def ResNet152(num_class):
-    return ResNet(Bottleneck, [3, 8, 36, 3], num_class)
+def ResNet152(output_size):
+    return ResNet(Bottleneck, [3, 8, 36, 3], output_size)
 

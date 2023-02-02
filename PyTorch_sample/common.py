@@ -20,6 +20,7 @@ class CustomTensorDataset(Dataset):
     def __len__(self):
         return self.tensors[0].size(0)
 
+# For Inference Tensor Dataset
 class InferenceTensorDataset(Dataset):
     def __init__(self, tensors, transform=None):
         self.tensors = tensors
