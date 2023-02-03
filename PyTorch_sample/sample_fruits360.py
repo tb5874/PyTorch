@@ -20,7 +20,8 @@ dataset_name = "fruits360"
 if __name__ == '__main__':
     try:
         # Parsing : NumPy
-        train_dataset, test_dataset, inference_dataset, classes = fruits360_parsing(train_flag=False)
+        train_flag = True
+        train_dataset, test_dataset, inference_dataset, classes = fruits360_parsing(train_flag)
 
         # Model
         if (False):

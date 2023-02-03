@@ -2,7 +2,7 @@ import os
 
 import cv2
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 def webcam_parser():
     try:
@@ -38,9 +38,14 @@ def webcam_parser():
             # Frame to NumPy
             numpy_frame = np.array(frame)
 
-            # Transpose : Col Row Channel -> Channel Row Col
-            transpose_numpy_frame = np.transpose(numpy_frame, (2, 1, 0))
+            # Transpose : Row Col Channel -> Channel Row Col
+            transpose_numpy_frame = np.transpose(numpy_frame, (2, 0, 1))
             inference_image.append(transpose_numpy_frame)
+
+            transpose_data = np.transpose(transpose_numpy_frame, (1, 2, 0)) # For PLT : row col channel
+            plt.imshow(transpose_data)
+            plt.show()
+
 
             # 27 is esc
             if cv2.waitKey(1) == 27:
@@ -56,7 +61,7 @@ def webcam_parser():
         image_np = np.array(inference_image, dtype=np.uint8)
 
         # Show PLT
-        if (False):
+        if (True):
             transpose_data = np.transpose(image_np[10], (1, 2, 0)) # For PLT : row col channel
             plt.imshow(transpose_data)
             plt.show()

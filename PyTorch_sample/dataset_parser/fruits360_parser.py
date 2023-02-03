@@ -8,12 +8,10 @@ import matplotlib.pyplot as plt
 # Setting : -->
 train_test_path         = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/fruits360/train_test/"
 inference_path          = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_data/fruits360/inference/"
-
-#numpy_cache_path        = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/numpy/size_100by100/"
 numpy_cache_path        = "C:/Users/" + os.environ.get("USERNAME") + "/Desktop/PyTorch_cache/numpy/size_224by224/"
 
-each_class_count        = 2500
-total_inference_count   = 15
+each_class_count        = 1000
+total_inference_count   = 20
 
 raw_resize              = (224, 224)
 # Setting : <--
@@ -26,7 +24,6 @@ def fruits360_parsing(train_flag):
         inference_image = []
 
         # Define a list of classes and their corresponding labels
-        # train_test/<folder name>
         classes = ['apple', 'banana', 'orange', 'strawberry']
 
         # Train Test Dataset : -->
@@ -73,16 +70,10 @@ def fruits360_parsing(train_flag):
             np.save(numpy_cache_path + "y_test.npy", y_test)
         else:
             # NumPy Load
-            if os.path.exists(numpy_cache_path + "X_train.npy") and\
-                os.path.exists(numpy_cache_path + "y_train.npy") and\
-                os.path.exists(numpy_cache_path + "X_test.npy") and\
-                os.path.exists(numpy_cache_path + "y_test.npy"):
-                X_train = np.load(numpy_cache_path + "X_train.npy")
-                y_train = np.load(numpy_cache_path + "y_train.npy")
-                X_test = np.load(numpy_cache_path + "X_test.npy")
-                y_test = np.load(numpy_cache_path + "y_test.npy")
-            else:
-                raise Exception("Not exist file\n")
+            X_train = np.load(numpy_cache_path + "X_train.npy")
+            y_train = np.load(numpy_cache_path + "y_train.npy")
+            X_test = np.load(numpy_cache_path + "X_test.npy")
+            y_test = np.load(numpy_cache_path + "y_test.npy")
         # Train Test Dataset : <--
 
 
